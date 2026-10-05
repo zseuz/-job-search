@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buscador de empleos</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+<header>
+  <h1>Buscador de empleos · Bogotá y remoto</h1>
+  <span class="meta" id="updated"></span>
+  <button class="primary" id="refresh">Actualizar ofertas</button>
+</header>
+<div class="layout">
+  <aside>
+    <h3>Buscar nuevas ofertas</h3>
+    <div class="hint">Cargos a buscar (separados por comas) y dónde buscarlos al pulsar «Actualizar ofertas».</div>
+    <input type="text" id="roles" value="analista de datos, desarrollador de software" title="Separa cargos con comas">
+    <div style="margin-top:6px">
+      {% for s in sources %}
+      <label class="check"><input type="checkbox" class="src" value="{{ s }}" checked> {{ s }}</label>
+      {% endfor %}
+    </div>
+    <label class="check"><input type="checkbox" id="expand" checked> Incluir cargos relacionados</label>
+    <div class="hint">Además de tus cargos busca "programador", "ingeniero de datos", etc. Trae muchas más ofertas.</div>
+    <h3 style="margin-top:10px">Páginas por fuente</h3>
+    <select id="pages">
+      <option value="1">1 (rápido)</option>
+      <option value="2" selected>2</option>
+      <option value="3">3</option>
+      <option value="5">5 (máximo, tarda mucho)</option>
+    </select>
+    <div class="hint">Más páginas = más ofertas, pero la búsqueda tarda más y las fuentes pueden limitarte (error 429).</div>
+    <div id="prog"><i></i></div>
+    <div id="log"></div>
+
+    <h3>Filtrar resultados</h3>
+    <input type="text" id="q" placeholder="Texto (título, empresa...)">
+    <h3>Modalidad</h3>
+    <label class="check"><input type="checkbox" class="mod" value="Remoto" checked> Remoto</label>
+    <label class="check"><input type="checkbox" class="mod" value="Híbrido" checked> Híbrido</label>
+    <label class="check"><input type="checkbox" class="mod" value="Presencial" checked> Presencial</label>
+    <label class="check"><input type="checkbox" class="mod" value="No indicado" checked> No indicado</label>
+    <h3>Tipo de cargo</h3>
+    <select id="kind"><option value="">Todos</option><option>Analista de datos</option><option>Desarrollador</option><option>Otros</option></select>
+    <h3>Búsqueda original</h3>
+    <select id="role"><option value="">Todas</option></select>
+    <h3>Fuentes a mostrar</h3>
+    <div class="hint">Desmarca las que no quieras ver en la lista (no borra ofertas).</div>
+    <div id="fsources">
+      {% for s in sources %}
+      <label class="check"><input type="checkbox" class="fsrc" value="{{ s }}" checked> {{ s }}</label>
+      {% endfor %}
+    </div>
+    <h3>Fecha de publicación</h3>
+    <select id="age">
+      <option value="">Cualquier fecha</option>
+      <option value="1">Últimas 24 horas</option>
+      <option value="3">Últimos 3 días</option>
+      <option value="7">Última semana (7 días)</option>
+      <option value="15">Últimos 15 días</option>
+      <option value="30">Último mes (30 días)</option>
+      <option value="90">Últimos 3 meses</option>
+    </select>
+    <label class="check"><input type="checkbox" id="noDate" checked> Incluir ofertas sin fecha (Indeed)</label>
+    <h3>Salario (COP/mes)</h3>
+    <div style="display:flex;gap:6px">
+      <input type="number" id="salMin" placeholder="Mínimo" step="500000">
+      <input type="number" id="salMax" placeholder="Máximo" step="500000">
+    </div>
+    <label class="check"><input type="checkbox" id="noSalary" checked> Incluir ofertas sin salario publicado</label>
+    <h3>Tipo de contrato</h3>
+    <select id="contract"><option value="">Todos</option></select>
+    <h3>Lenguajes y tecnologías</h3>
+    <div class="hint">Clic: incluir · Doble clic: excluir (tachado en rojo)</div>
+    <div class="seg">
+      <label class="check"><input type="radio" name="mode" value="any" checked> Cualquiera</label>
+      <label class="check"><input type="radio" name="mode" value="all"> Todas</label>
+    </div>
+    <div id="techs"></div>
+    <div class="actions">
+      <button class="primary" id="apply" style="flex:1">Aplicar filtros</button>
+      <button id="clear" class="ghost">Limpiar</button>
+    </div>
+  </aside>
+  <main>
+    <div class="top"><strong id="count"></strong>
+      <select id="sort" style="width:auto"><option value="">Orden: más recientes</option><option value="sal">Mayor salario</option><option value="tech">Más tecnologías</option></select></div>
+    <div id="list"></div>
+  </main>
+</div>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
