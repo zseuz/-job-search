@@ -1,0 +1,306 @@
+/* ==========================================================================
+   Buscador de empleos
+   1. Variables   2. Base   3. Layout   4. Formularios   5. Botones
+   6. Filtros de tecnologías   7. Tarjeta de oferta   8. Progreso y estados
+   ========================================================================== */
+
+/* ---- 1. Variables ------------------------------------------------------- */
+:root {
+  --bg: #f5f6f8;
+  --card: #fff;
+  --text: #1c2230;
+  --muted: #667085;
+  --line: #e4e7ec;
+  --accent: #2563eb;
+  --chip: #eef2ff;
+  --ok-bg: #dcfce7;
+  --ok-fg: #14532d;
+  --danger-bg: #fee2e2;
+  --danger-fg: #991b1b;
+  --danger-line: #fca5a5;
+  --mark-bg: #fde68a;
+  --mark-fg: #1c2230;
+  --radius: 10px;
+  --radius-sm: 7px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1218;
+    --card: #181d27;
+    --text: #e7eaf0;
+    --muted: #98a2b3;
+    --line: #2a3140;
+    --accent: #6b9bff;
+    --chip: #222b44;
+    --ok-bg: #173d27;
+    --ok-fg: #a7f3c4;
+    --danger-bg: #4a1d1d;
+    --danger-fg: #fca5a5;
+    --danger-line: #7f2d2d;
+  }
+}
+
+/* ---- 2. Base ------------------------------------------------------------ */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font: 15px/1.45 system-ui, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+h1 { font-size: 18px; margin: 0; flex: 1; }
+
+[hidden] { display: none !important; }
+
+.meta { color: var(--muted); font-size: 13px; }
+.hint { font-size: 12px; color: var(--muted); margin: 2px 0 6px; }
+
+/* ---- 3. Layout ---------------------------------------------------------- */
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+  background: var(--card);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  gap: 20px;
+  max-width: 1300px;
+  margin: auto;
+  padding: 20px;
+}
+
+@media (max-width: 800px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+.sidebar {
+  position: sticky;
+  top: 12px;
+  align-self: start;
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.section-title {
+  margin: 14px 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.sidebar section:first-child > .section-title:first-child { margin-top: 0; }
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.sticky-actions {
+  position: sticky;
+  bottom: -14px;
+  display: flex;
+  gap: 8px;
+  margin-bottom: -14px;
+  padding: 10px 0 14px;
+  background: var(--card);
+}
+
+.stack { margin-top: 6px; }
+.grow { flex: 1; }
+.auto-width { width: auto !important; }
+
+/* ---- 4. Formularios ----------------------------------------------------- */
+input[type="text"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 7px 9px;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  cursor: pointer;
+}
+
+.range { display: flex; gap: 6px; }
+.segmented { display: flex; gap: 14px; margin-bottom: 6px; }
+
+/* ---- 5. Botones --------------------------------------------------------- */
+.btn {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.btn-primary {
+  padding: 8px 14px;
+  color: #fff;
+  background: var(--accent);
+  border: 0;
+}
+
+.btn-primary:disabled { opacity: .5; cursor: wait; }
+
+.btn-ghost {
+  padding: 8px 12px;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--line);
+}
+
+.btn-ghost:disabled { opacity: .5; cursor: not-allowed; }
+.btn-small { padding: 4px 10px; font-size: 13px; }
+
+/* ---- 6. Filtros de tecnologías ------------------------------------------ */
+.tech-group-title { margin: 8px 0 4px; font-size: 12px; color: var(--muted); }
+.tech-list { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.tech-chip {
+  padding: 3px 9px;
+  font-size: 12px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tech-chip.is-included { color: #fff; background: var(--accent); border-color: var(--accent); }
+
+.tech-chip.is-excluded {
+  color: var(--danger-fg);
+  background: var(--danger-bg);
+  border-color: var(--danger-line);
+  text-decoration: line-through;
+}
+
+/* ---- 7. Tarjeta de oferta ----------------------------------------------- */
+.job {
+  margin-bottom: 10px;
+  padding: 14px 16px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.job h2 { margin: 0 0 2px; font-size: 16px; }
+.job h2 a, .open-link { color: var(--accent); text-decoration: none; }
+.job h2 a:hover, .open-link:hover { text-decoration: underline; }
+.open-link { font-size: 13px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chip { padding: 2px 8px; font-size: 12px; background: var(--chip); border-radius: 6px; }
+.chip-source { font-weight: 600; }
+.chip-highlight { color: var(--ok-fg); background: var(--ok-bg); }
+
+.job-actions { display: flex; align-items: center; gap: 14px; margin-top: 10px; }
+
+.description {
+  max-height: 360px;
+  margin-top: 10px;
+  padding: 12px 14px;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-line;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.description mark {
+  padding: 0 2px;
+  color: var(--mark-fg);
+  background: var(--mark-bg);
+  border-radius: 3px;
+}
+
+/* ---- 8. Progreso y estados ---------------------------------------------- */
+.progress {
+  height: 6px;
+  margin-top: 8px;
+  overflow: hidden;
+  background: var(--line);
+  border-radius: 99px;
+}
+
+.progress i {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 99px;
+  transition: width .5s;
+}
+
+.progress.is-indeterminate i { width: 40% !important; animation: slide 1.1s ease-in-out infinite; }
+
+.log {
+  max-height: 120px;
+  margin-top: 8px;
+  overflow: auto;
+  font: 12px/1.4 ui-monospace, Consolas, monospace;
+  color: var(--muted);
+  white-space: pre-wrap;
+}
+
+.spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  margin-right: 6px;
+  vertical-align: -2px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+
+.loading { padding: 50px 0; text-align: center; color: var(--muted); }
+
+.loading .spinner {
+  display: block;
+  width: 28px;
+  height: 28px;
+  margin: 0 auto 10px;
+  border-width: 3px;
+  color: var(--accent);
+}
+
+.empty { padding: 40px 0; text-align: center; color: var(--muted); }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes slide { 0% { margin-left: -40%; } 100% { margin-left: 100%; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner, .progress.is-indeterminate i { animation-duration: 3s; }
+}

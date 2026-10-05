@@ -1,0 +1,84 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "buscador-empleos"
+version = "1.0.0"
+description = "Reúne ofertas de empleo de varios portales colombianos en una sola página con filtros."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "flask>=3.0",
+    "requests>=2.31",
+    "beautifulsoup4>=4.12",
+    "curl_cffi>=0.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "coverage>=7",
+    "ruff>=0.6",
+    "mypy>=1.10",
+    "types-requests",
+]
+
+[project.scripts]
+buscador-empleos = "buscador_empleos.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+buscador_empleos = ["py.typed", "web/templates/*.html", "web/static/css/*.css", "web/static/js/*.js"]
+
+# ---------------------------------------------------------------- calidad de código
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # imports ordenados
+    "B",        # errores probables (flake8-bugbear)
+    "UP",       # sintaxis moderna
+    "SIM",      # simplificaciones
+    "C4",       # comprensiones
+    "RET",      # return
+    "PTH",      # pathlib
+    "N",        # nombres
+]
+ignore = [
+    "UP017",    # datetime.UTC existe desde 3.11; se admite 3.10
+    "RET505",   # 'else' tras 'return': a veces es más legible
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["B011", "N802", "PTH", "E501"]  # E501: el HTML de ejemplo tiene líneas largas
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+files = ["src"]
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = ["curl_cffi", "curl_cffi.*"]
+ignore_missing_imports = true
+
+[tool.coverage.run]
+source = ["buscador_empleos"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+skip_covered = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "\\.\\.\\.",
+]

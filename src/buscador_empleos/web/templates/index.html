@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Ofertas de empleo de varios portales colombianos en una sola página, con filtros por tecnología, salario y fecha.">
+  <title>Buscador de empleos</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+  <header class="app-header">
+    <h1>Buscador de empleos · Bogotá y remoto</h1>
+    <span class="meta" id="updated" aria-live="polite"></span>
+    <button type="button" class="btn btn-primary" id="refresh">Actualizar ofertas</button>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" aria-label="Búsqueda y filtros">
+
+      <section aria-labelledby="h-search">
+        <h2 class="section-title" id="h-search">Buscar nuevas ofertas</h2>
+        <p class="hint">Cargos a buscar (separados por comas) y dónde buscarlos al pulsar «Actualizar ofertas».</p>
+        <input type="text" id="roles" value="analista de datos, desarrollador de software"
+               aria-label="Cargos a buscar, separados por comas">
+        <div class="stack">
+          {% for source in sources %}
+          <label class="check"><input type="checkbox" class="search-source" value="{{ source }}" checked> {{ source }}</label>
+          {% endfor %}
+        </div>
+        <label class="check"><input type="checkbox" id="expand" checked> Incluir cargos relacionados</label>
+        <p class="hint">Además de tus cargos busca "programador", "ingeniero de datos", etc. Trae muchas más ofertas.</p>
+        <h3 class="section-title">Páginas por fuente</h3>
+        <select id="pages" aria-label="Páginas por fuente">
+          {% for n in page_options %}
+          <option value="{{ n }}"{% if n == default_pages %} selected{% endif %}>{{ n }}{% if n == 1 %} (rápido){% elif n == max_pages %} (máximo, tarda mucho){% endif %}</option>
+          {% endfor %}
+        </select>
+        <p class="hint">Más páginas = más ofertas, pero la búsqueda tarda más y las fuentes pueden limitarte (error 429).</p>
+        <div class="progress" id="progress" hidden><i></i></div>
+        <div class="log" id="log" role="status" aria-live="polite"></div>
+      </section>
+
+      <section aria-labelledby="h-filters">
+        <h2 class="section-title" id="h-filters">Filtrar resultados</h2>
+        <input type="text" id="text" placeholder="Texto (título, empresa...)" aria-label="Texto a buscar en título o empresa">
+
+        <h3 class="section-title">Modalidad</h3>
+        {% for modality in modalities %}
+        <label class="check"><input type="checkbox" class="filter-modality" value="{{ modality }}" checked> {{ modality }}</label>
+        {% endfor %}
+
+        <h3 class="section-title">Tipo de cargo</h3>
+        <select id="kind" aria-label="Tipo de cargo">
+          <option value="">Todos</option>
+          {% for kind in role_kinds %}<option>{{ kind }}</option>{% endfor %}
+        </select>
+
+        <h3 class="section-title">Búsqueda original</h3>
+        <select id="query" aria-label="Búsqueda que encontró la oferta"><option value="">Todas</option></select>
+
+        <h3 class="section-title">Fuentes a mostrar</h3>
+        <p class="hint">Desmarca las que no quieras ver en la lista (no borra ofertas).</p>
+        <div>
+          {% for source in sources %}
+          <label class="check"><input type="checkbox" class="filter-source" value="{{ source }}" checked> {{ source }}</label>
+          {% endfor %}
+        </div>
+
+        <h3 class="section-title">Fecha de publicación</h3>
+        <select id="age" aria-label="Fecha de publicación">
+          <option value="">Cualquier fecha</option>
+          <option value="1">Últimas 24 horas</option>
+          <option value="3">Últimos 3 días</option>
+          <option value="7">Última semana (7 días)</option>
+          <option value="15">Últimos 15 días</option>
+          <option value="30">Último mes (30 días)</option>
+          <option value="90">Últimos 3 meses</option>
+        </select>
+        <label class="check"><input type="checkbox" id="include-undated" checked> Incluir ofertas sin fecha (Indeed)</label>
+
+        <h3 class="section-title">Salario (COP/mes)</h3>
+        <div class="range">
+          <input type="number" id="salary-min" placeholder="Mínimo" step="500000" aria-label="Salario mínimo">
+          <input type="number" id="salary-max" placeholder="Máximo" step="500000" aria-label="Salario máximo">
+        </div>
+        <label class="check"><input type="checkbox" id="include-unpaid" checked> Incluir ofertas sin salario publicado</label>
+
+        <h3 class="section-title">Tipo de contrato</h3>
+        <select id="contract" aria-label="Tipo de contrato"><option value="">Todos</option></select>
+
+        <h3 class="section-title">Lenguajes y tecnologías</h3>
+        <p class="hint">Clic: incluir · Doble clic: excluir (tachado en rojo)</p>
+        <div class="segmented" role="radiogroup" aria-label="Combinar tecnologías">
+          <label class="check"><input type="radio" name="tech-mode" value="any" checked> Cualquiera</label>
+          <label class="check"><input type="radio" name="tech-mode" value="all"> Todas</label>
+        </div>
+        <div id="techs"></div>
+
+        <div class="sticky-actions">
+          <button type="button" class="btn btn-primary grow" id="apply">Aplicar filtros</button>
+          <button type="button" class="btn btn-ghost" id="clear">Limpiar</button>
+        </div>
+      </section>
+    </aside>
+
+    <main>
+      <div class="toolbar">
+        <strong id="count" aria-live="polite"></strong>
+        <select id="sort" class="auto-width" aria-label="Orden de la lista">
+          <option value="">Orden: más recientes</option>
+          <option value="salary">Mayor salario</option>
+          <option value="techs">Más tecnologías</option>
+        </select>
+      </div>
+      <div id="list" aria-live="polite"></div>
+    </main>
+  </div>
+
+  <script type="application/json" id="boot-data">{{ boot | tojson }}</script>
+  <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
